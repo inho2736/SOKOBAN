@@ -18,6 +18,15 @@ void mapscan(void);
 void mapopen(void);
 void stagescan(void);
 void move(void);
+void e_xit(void);
+void success(void);
+void print(void);
+void input_name(void);
+
+
+
+
+
 int getch(void)//엔터없이 방향키와 옵션을 입력받는데 쓰는 getch함수
 {
 	int ch;
@@ -305,6 +314,184 @@ void move(void)
 					print();
 				}
 			}
+			 if (k == 's'){
+        printf("(command) s");
+	      save();
+      }
+      else{
+        if (k == 'u'){              //undo
+          if (u <= 1)
+            continue;//맨처음 화면을 u를 받도록
+          if (u_count > 4)
+            continue;
+          else{
+            u--;
+	    system("clear");
 
+	printf("hello ");
+	for(int i=0; i<10; i++)
+		printf("%c", name[i]);
+	    for (int j = 0; j < 30; j++)
+              for (int k = 0; k< 30; k++){
+                printf("%c", undo[u-1][l1][j][k]);	//현재 u값에 해당하는 undo배열은 현재화면이므로 u-1을 쓴다.
+                stage[l1][j][k] = undo[u-1][l1][j][k];	//undo에 저장된 맵을 stage에 입력한다.
+                if (stage[l1][j][k] == '@'){	//창고지기의 좌표를 찾으면 그 좌표를 새로 지정한다.
+                  y1 = j;
+                  x1 = k;
+                }
+              }
+
+		printf("(command (u))");
+              u_count++;
+          }
+        }
+        else{	//u가 아닌 다른 키가 눌렸을 경우 그에 따른 화면을 undo배열에 저장한다.
+          if (u > 5){// 맨처음부터 5번 넘게 움직였을 경우 undo[0]에는 undo[1]을, undo[1]에는 undo[2]를 저장하는 방식으로 값을 옮긴다.
+            for(int i = 0; i <= 4; i++){
+              for (int j = 0; j < 30; j++)
+                for (int k = 0; k < 30; k++){
+                  undo[i][l1][j][k] = undo[i+1][l1][j][k];
+              }
+            }
+            for (int j = 0; j < 30; j++)	// 현재 화면을 undo[5]에 저장해둔다.
+              for (int k = 0; k < 30; k++){
+                undo[5][l1][j][k] = stage[l1][j][k];
+              }
+
+
+          }
+          else {	//맨처음 5번까지의 화면을 undo배열에 저장한다
+            for (int j = 0; j < 30; j++)
+              for (int k = 0; k < 30; k++){
+                undo[u][l1][j][k] = stage[l1][j][k];
+              }
+            u++;
+          }
+        }
+      }
+      if (k == 'f'){
+        file_load();
+      }
+
+      if (k == 'r'){
+        replay();
+        begin_undo();
+        printf("(command) r");
+      }
+
+      if (k == 'n'){
+        new();
+        startTime = clock();
+        begin_undo();
+        printf("(command) n");
+      }
+      if (k == 't'){
+        time_check();
+        printf("시간 : %f초", time_gap);
+      }
+      if (k == 'd'){
+	     display_help();
+      }
+
+      if (k == 'e'){
+	      e_xit();
+	      printf("(command) e");
+	      exit (0);}
+
+
+      success();
+		}
+}
+void e_xit(void)//e를 누를경우 실행되는 함수
+{
+	char n1;
+	save();//save로 저장ㅎ한다
+	system("clear");//게임 화면을 없앤다.
+	printf("see you ");//작별인사 출력
+	FILE *a;
+        a =  fopen("name.txt", "r");//name.txt에 저장
+	while(fscanf(a,"%c", &n1)!= EOF)
+		printf("%c", n1);
+	fclose(a);
+	printf("\n");
+}
+void success(void){
+  int success = 0;
+  char box[30][30] = {0};//박스의 y좌표와 x좌표를 초기화시켜준다.
+  int boxn[5] = {0};//각 단계의 상자의 갯수를 초기화시켜준다.
+  boxn[0]=6;//1단계의 박스의 갯수 설정
+  boxn[1]=10;//2단계의 박스의 갯수 설정
+  boxn[2]=11;//3단계의 박스의 갯수 설정
+  boxn[3]=20;//4단계의 박스의 갯수 설정
+  boxn[4]=12;//5단계의 박스의 갯수 설정
+
+  for(int j=0;j<30;j++)
+    for(int k=0;k<30;k++){
+      if (map[l1][j][k] == 'O'){
+        box[j][k] = '$';
+	  }
+	}
+  for (int j = 0; j < 30; j++)
+    for(int k= 0; k < 30; k++){
+      if (stage[l1][j][k] == '$'){
+        if (box[j][k] == stage[l1][j][k])
+          success++;
+	  }
+    }
+  if (success == boxn[q]){
+		time_check();
+		input_rank();
+    u = 0;
+    u_count = 0;
+    l1++;
+	error();
+	  q++;
+	  p++;
+    x1=cx[p], y1=cy[p];
+    if (l1 == 5){
+			printf("Congratulations!");
+			exit(0);
+		}
+    system("clear");
+	print();
+	startTime = clock();
+  begin_undo();
+
+  }
+  success = 0;
+
+
+}
+void print(void){
+	system("clear");//단계가 올라갈때마다 그전 단계를 지워준다.
+	printf("hello ");
+	for(int i=0; i<10; i++)//저장한 이름을 출력한다
+		printf("%c", name[i]);
+	for(int j=0;j<30;j++){
+		for(int k=0;k<30;k++){
+			printf("%c",stage[l1][j][k]);//stage출력
+				}
+			}
+}
+void input_name(void){
+
+  char c, trash;
+  printf("이름을 입력하세요 : ");
+  for (int i = 0; i < 10; i++){//이름을 name배열에 저장한다.
+    scanf("%c", &name[i]);
+    if (name[i] == 10)
+      break;
+    }
+
+    FILE *N;
+    N = fopen("name.txt", "w");
+    for (int i = 0; i < 10; i++){
+      fprintf(N, "%c", name[i]);
+    }
+    fclose(N);
+
+
+}
+//----------------------replay 함수----------------------------------
 
 
