@@ -31,6 +31,19 @@ void file_load(void);
 void display_help(void);
 void error(void);
 void input_rank(void);
+int main(void)// 게임 제어가 돌아가는 메인함수. 이름을 먼저 입력받고 맵을 입력받고 에러를 확인하고 출력하면서 시간을 재는것을 시작한다. 그다음 커서가 움직이게 한다.
+{
+
+	input_name();
+	mapscan();
+	//mapopen();
+    stagescan();
+	error();
+	print();
+ startTime = clock();
+	move();
+	return 0;
+}
 int getch(void)//엔터없이 방향키와 옵션을 입력받는데 쓰는 getch함수
 {
 	int ch;
