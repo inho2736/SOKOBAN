@@ -28,9 +28,9 @@ void time_check(void);
 void save(void);
 void begin_undo(void);
 void file_load(void);
-
-
-
+void display_help(void);
+void error(void);
+void input_rank(void);
 int getch(void)//엔터없이 방향키와 옵션을 입력받는데 쓰는 getch함수
 {
 	int ch;
@@ -592,4 +592,113 @@ void file_load(void)
   print();
   printf("(command) f");
 }
+void display_help(void)//d를 누를경우 키의 기능들을 나타나게하고 (command) d를 출력한다.
+{
+  system("clear");
+  printf("hello ");
+for(int i=0; i<10; i++)
+  printf("%c", name[i]);
+  printf("\n");
+  printf("h(왼쪽),j(아래),k(위),l(오른쪽)\n");
+  printf("u(undo)\n");
+  printf("r(replay)\n");
+  printf("n(new)\n");
+  printf("e(exit)\n");
+  printf("s(save)\n");
+  printf("f(file load)\n");
+  printf("d(display help)\n");
+  printf("t(top)\n");
+  printf("\n");
+  printf("(command) d");
+}
+void error(void)//stagescan에서 맵을 읽는 도중에 저장한 배열이 $일경우 count2를 증가시키고 O를 만날경우 count1을 증가시킨다.
+{
+	if(!(count1==count2)){//증가시킨 count1값과 count2 값이 같지 않을 경우 오류 메시지를 띄우고 프로그램을 종료 시킨다.
+		printf("박스의 개수와 보관장소의 개수가 일치하지 않습니다.");
+		exit (0);
+	}
+}
+void input_rank(void){
+	for (int i = 0; i < 10; i++)
+		r_name[l1][6][i] = name[i];
+	ranking[l1][6] = time_gap;
+  FILE *rank;
+  rank = fopen("ranking.txt", "w+r");
+  char c;
+	int l = l1 + 1;
+	int a;
+	char ll = l;
+  char c_tmp[11];
+	int n;
+  float tmp;
 
+	if (fscanf(rank, "%c", &c) == '\0'){
+		fprintf(rank, "%d", l1 + 1);
+		fclose(rank);
+		fopen("ranking.txt", "w+r");
+	}
+  while(1){
+		fscanf(rank, "%c", &c);
+		if (c == 'p');
+		break;
+	}
+		fscanf(rank, "%d", &a);
+
+  fscanf(rank, "%c", &c);  //\n
+  for(int i = 0; i < 5; i++){
+    for(int k = 0; k < 10; k++){
+      fscanf(rank, "%c", &r_name[l1][i][k]);
+			n = k;
+      if (r_name[l1][i][k] == ' ' || r_name[l1][i][k] == '\0' )
+        break;
+    }
+    if (r_name[l1][i][n] == '\0')
+      break;
+    for(int k = 0; k < 2; k++){
+      fscanf(rank, "%f", &ranking[l1][k]);
+      if (ranking[l1][k] == '\n')
+        break;
+    }
+
+  }
+  fclose(rank);
+  for (int i = 5; i >= 0; i--)
+    for (int k = 0; k < 6; k++){
+      if (ranking[l1][i] < ranking[l1][5-k]){
+        tmp = ranking[l1][i];
+        ranking[l1][i] = ranking[l1][5-k];
+        ranking[l1][5-k] = tmp;
+				for(int j = 0; j < 11; j++){
+        c_tmp[j] = r_name[l1][i][j];
+        r_name[l1][i][j] = r_name[l1][5-k][j];
+        r_name[l1][5-k][j] = c_tmp[j];
+				}
+      }
+    }
+
+  rank = fopen("ranking.txt", "w+r");
+//  for(fscanf(rank, "%c", c); c != (l1 + 1); fscanf(rank, "%c", c)){
+
+  //}
+  fscanf(rank, "%c", c);  //\n
+  for(int i = 0; i < 5; i++){
+    for(int k = 0; k < 10; k++){
+      fprintf(rank, "%c", r_name[l1][i][k]);
+			n = k;
+      if (r_name[l1][i][k] == ' ' || r_name[l1][i][k] == '\0' )
+        break;
+    }
+    if (r_name[l1][i][n] == '\0')
+      break;
+    for(int k = 0; k < 2; k++){
+      fprintf(rank, "%f", ranking[l1][k]);
+      if (ranking[l1][k] == '\n')
+        break;
+    }
+
+  }
+	fclose(rank);
+
+
+
+}
