@@ -22,8 +22,12 @@ void e_xit(void);
 void success(void);
 void print(void);
 void input_name(void);
-
-
+void replay(void);
+void new(void);
+void time_check(void);
+void save(void);
+void begin_undo(void);
+void file_load(void);
 
 
 
@@ -493,5 +497,99 @@ void input_name(void){
 
 }
 //----------------------replay 함수----------------------------------
+void replay(void){//stage에서 움직인 것을 모두 초기화한다.
+  for (int j = 0; j < 30; j++)
+    for (int k = 0; k < 30; k++){
+      stage[l1][j][k] = map[l1][j][k];
+      if (stage[l1][j][k] == '@'){
+        y1 = j;
+        x1 = k;
+      }
+    }
+    u = 0;
+    u_count = 0; //undo의 횟수도 초기화 시킨다
+    print();
+}
+//----------------------------new함수-----------------------------
+void new(void){//stage에서 움직인 것을 초기화하기 위해 map에서 파일을 불러 들인다
+  l1 = 0;
+    for (int j = 0; j < 30; j++)
+      for (int k = 0; k < 30; k++){
+        stage[l1][j][k] = map[l1][j][k];
+        if (stage[l1][j][k] == '@'){
+          y1 = j;
+          x1 = k;
+        }
+      }
+      u = 0;
+      u_count = 0;
+      print();
+}
+void time_check(void){//진행한 시간을 저장하는 함수
+  endTime = clock();
+  time_gap = (float)(endTime - startTime) / CLOCKS_PER_SEC - loadTime_gap;
 
+}
+void save(void){//save를 하고 시간을 멈춘다.
+
+    endTime = clock();
+    FILE *save;
+    save = fopen("sokoban.txt", "w");//save를 sokoban.txt에 저장한다.
+    fprintf(save, "%d\n", u);
+    fprintf(save, "%d\n", u_count);
+    fprintf(save, "%d\n", p);
+    fprintf(save, "%d\n", q);
+    fprintf(save, "%d\n", x1);
+    fprintf(save, "%d\n", y1);
+    fprintf(save, "%d\n", endTime);
+    fprintf(save, "%d\n", l1);
+    for (int i = 0; i < 30; i++)
+      for (int j = 0; j < 30; j++)
+        fprintf(save, "%c", stage[l1][i][j]);//save할때 stage에서 창고지기와 보물이 움직인 모습 그대로 저장한다
+    for (int i = 0; i < 6; i++)
+      for (int j = 0; j < 30; j++)
+        for(int k = 0; k < 30; k++)
+          fprintf(save, "%c", undo[i][l1][j][k]);// undo의 횟수를 저장한다.
+    fclose(save);
+}
+void begin_undo(void){// 맨 처음 화면을 undo[0]배열에 저장한다
+  for (int j = 0; j < 30; j++)
+    for (int k = 0; k < 30; k++){
+      undo[u][l1][j][k] = stage[l1][j][k];
+    }
+  u++;
+
+}
+void file_load(void)
+{
+  endTime = clock();//save한뒤 file load를 하기전 시간을 감소시키위해 사용
+  char trash;
+  FILE *open;
+  open =  fopen("sokoban.txt", "r");//sokoban.txt에 저장한거를 불러들인다.
+  if ((open = fopen("sokoban.txt", "r")) == NULL){
+    printf("오류 : sokoban.txt 파일을 열 수 없습니다.\n");
+    return;
+    }
+  fscanf(open, "%d\n", &u);
+  fscanf(open, "%d\n", &u_count);
+  fscanf(open, "%d\n", &p);
+  fscanf(open, "%d\n", &q);
+  fscanf(open, "%d\n", &x1);
+  fscanf(open, "%d\n", &y1);
+  fscanf(open, "%d\n", &pre_endTime);
+  fscanf(open, "%d\n", &l1);
+
+  for (int i = 0; i < 30; i++)
+    for (int j = 0; j < 30; j++){
+      fscanf(open, "%c", &stage[l1][i][j]);
+    }
+  for (int i = 0; i < 6; i++)
+    for (int j = 0; j < 30; j++)
+      for(int k = 0; k < 30; k++)
+        fscanf(open, "%c", &undo[i][l1][j][k]);
+  loadTime_gap = (float)(endTime - pre_endTime) / CLOCKS_PER_SEC;
+  fclose(open);
+  print();
+  printf("(command) f");
+}
 
